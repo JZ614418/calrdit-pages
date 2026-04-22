@@ -46,13 +46,10 @@
   <p>All of the above is stored locally via Apple's SwiftData and Keychain. We have no server database that holds any of it. Your SwiftData records can optionally sync to your private iCloud container; that sync is entirely inside your Apple ID, not visible to us.</p>
 
   <h3>What is sent off-device</h3>
-  <p>To estimate calories from text or a photo, Calrdit sends the relevant request to OpenAI's Chat Completions API. There are two modes:</p>
+  <p>To estimate calories from text or a photo, Calrdit sends the request to OpenAI's Chat Completions API through our proxy hosted on Cloudflare Workers (global edge network, US region egress). The proxy attaches an anonymous per-device identifier (<code>identifierForVendor</code>, resets on app reinstall) solely for daily quota counting. If you subscribe to Calrdit Plus, your StoreKit 2 transaction JWS may also travel alongside the request so the proxy can lift the daily free cap — we never persist the JWS or the content of your request. OpenAI may retain API traffic per their policy; see <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>.</p>
 
-  <p><strong>1. Calrdit Cloud (default)</strong><br>
-  Requests go through our proxy hosted on Cloudflare Workers (global edge network, served from the US region for your traffic), which forwards them to OpenAI. The proxy attaches an anonymous per-device identifier (<code>identifierForVendor</code>, resets on app reinstall) solely for daily quota counting. We do not persist request content, store transcripts, or link requests to a user identity. OpenAI may retain API traffic per their policy; see <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>.</p>
-
-  <p><strong>2. Bring Your Own Key</strong><br>
-  If you paste your own OpenAI API key in Settings, Calrdit calls OpenAI directly using your key. Requests do not touch our servers in this mode. Your key is stored only in your device Keychain.</p>
+  <h3>Subscription and payment</h3>
+  <p>Calrdit Plus is an auto-renewing subscription handled entirely by Apple's StoreKit. Payment, receipts, renewals, and refunds are managed by Apple — we do not see your payment method or Apple ID. The only subscription-related data our server handles is the anonymous transaction signature you present alongside an AI request, which we verify then discard.</p>
 
   <h3>Device permissions</h3>
   <ul>
@@ -89,13 +86,10 @@
   <p>以上都走 Apple 的 SwiftData 和钥匙串，我们这边没有任何服务器数据库保存它们。SwiftData 记录可以选择同步到你个人的 iCloud 容器；那份同步完全发生在你的 Apple ID 内，我们看不到。</p>
 
   <h3>会离开你手机的数据</h3>
-  <p>为了从文字或照片估算热量，Calrdit 会把相应请求发给 OpenAI 的 Chat Completions API。有两种模式：</p>
+  <p>为了从文字或照片估算热量，Calrdit 会通过我们部署在 Cloudflare Workers（美国节点出口）上的代理把请求转发给 OpenAI 的 Chat Completions API。代理会带一个匿名的设备标识（<code>identifierForVendor</code>，重装即重置）用于每日配额计数。如果你订阅了 Calrdit Plus，客户端会在请求里附带 StoreKit 2 的交易签名以便代理抬高免费额度——我们既不保存这个签名，也不保存请求内容。OpenAI 自身会按其政策保留 API 流量，详见 <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>。</p>
 
-  <p><strong>1. Calrdit 云端（默认）</strong><br>
-  请求先经过我们部署在 Cloudflare Workers 全球边缘网络（美国节点出口）上的代理，再转发到 OpenAI。代理会带一个匿名的设备标识（<code>identifierForVendor</code>，重装即重置）用于每日配额计数。我们不保留请求内容、不存储对话、不把请求和用户身份关联。OpenAI 自身会按其政策保留 API 流量，详见 <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>。</p>
-
-  <p><strong>2. 自带 OpenAI Key</strong><br>
-  如果你在设置里填了自己的 OpenAI API key，Calrdit 会用你的 key 直连 OpenAI。这种模式下请求完全不经过我们的服务器。你的 key 只存在本机钥匙串里。</p>
+  <h3>订阅与支付</h3>
+  <p>Calrdit Plus 是一个自动续期订阅，完全由 Apple 的 StoreKit 处理——付款、收据、续期、退款全部走 Apple 账户，<strong>我们看不到你的支付方式或 Apple ID</strong>。我们服务器只会临时用到一个匿名的交易签名（验一下是否有效），验完就丢。</p>
 
   <h3>设备权限</h3>
   <ul>
