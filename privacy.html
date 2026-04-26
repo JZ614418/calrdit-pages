@@ -45,8 +45,40 @@
   </ul>
   <p>All of the above is stored locally via Apple's SwiftData and Keychain. We have no server database that holds any of it. Your SwiftData records can optionally sync to your private iCloud container; that sync is entirely inside your Apple ID, not visible to us.</p>
 
-  <h3>What is sent off-device</h3>
-  <p>To estimate calories from text or a photo, Calrdit sends the request to OpenAI's Chat Completions API through our proxy hosted on Cloudflare Workers (global edge network, US region egress). The proxy attaches an anonymous per-device identifier (<code>identifierForVendor</code>, resets on app reinstall) solely for daily quota counting. If you subscribe to Calrdit Plus, your StoreKit 2 transaction JWS may also travel alongside the request so the proxy can lift the daily free cap — we never persist the JWS or the content of your request. OpenAI may retain API traffic per their policy; see <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>.</p>
+  <h3>What is sent off-device, and what isn't</h3>
+  <p><strong>The only thing Calrdit ever transmits is the meal you explicitly submit for AI calorie estimation</strong> — and only when you tap "Accept" on the in-app consent prompt that appears the first time you use AI.</p>
+
+  <table style="width:100%; border-collapse: collapse; margin: 12px 0;">
+    <tr style="border-bottom: 0.8px solid #EDEDED;">
+      <th style="text-align:left; padding: 8px 0; color:#6B6B6B; font-size: 13px; font-weight: 600;">What</th>
+      <th style="text-align:left; padding: 8px 0; color:#6B6B6B; font-size: 13px; font-weight: 600;">Where it goes</th>
+      <th style="text-align:left; padding: 8px 0; color:#6B6B6B; font-size: 13px; font-weight: 600;">Why</th>
+    </tr>
+    <tr style="border-bottom: 0.8px solid #EDEDED;">
+      <td style="padding: 10px 0;">Meal text or JPEG-compressed photo</td>
+      <td style="padding: 10px 0;">Cloudflare Workers proxy (US) → OpenAI GPT-4o-mini</td>
+      <td style="padding: 10px 0;">Calorie estimation</td>
+    </tr>
+    <tr style="border-bottom: 0.8px solid #EDEDED;">
+      <td style="padding: 10px 0;">Anonymous per-device counter (<code>identifierForVendor</code>, resets on reinstall)</td>
+      <td style="padding: 10px 0;">Cloudflare Workers KV</td>
+      <td style="padding: 10px 0;">Enforce free daily quota (3/day)</td>
+    </tr>
+    <tr style="border-bottom: 0.8px solid #EDEDED;">
+      <td style="padding: 10px 0;">StoreKit 2 transaction JWS (only if subscribed)</td>
+      <td style="padding: 10px 0;">Cloudflare Workers proxy</td>
+      <td style="padding: 10px 0;">Verify subscription to lift the daily cap; <strong>read then discarded, never stored</strong></td>
+    </tr>
+  </table>
+
+  <p><strong>What we never transmit:</strong> your name, email, Apple ID, profile (height/weight/goal), location, device identifier (other than the anonymous counter above), past meal logs, photo metadata (we strip EXIF before transmission), or any health/biometric data.</p>
+
+  <p><strong>OpenAI's role:</strong> OpenAI processes the single request to estimate calories and returns the result. OpenAI may retain API traffic per their policy — see <a href="https://openai.com/policies/privacy-policy/">openai.com/policies/privacy-policy</a>. By accepting Calrdit's AI consent prompt you agree to OpenAI's processing of your submitted meal data.</p>
+
+  <p><strong>Our retention:</strong> the Cloudflare Workers proxy does not persist request bodies or AI responses. The KV-stored daily counter is keyed by the anonymous identifier and auto-expires after 48 hours.</p>
+
+  <h3>Consent</h3>
+  <p>The first time you tap "+" and choose AI text or photo entry, the app shows a full-screen consent sheet stating exactly what will be sent and to whom. AI requests do not leave your device until you tap "Accept and continue." If you decline, you can still log meals manually with no network request. You can revoke consent and erase all local data anytime via <strong>Settings → Account → Delete account</strong>.</p>
 
   <h3>Subscription and payment</h3>
   <p>Calrdit Plus is an auto-renewing subscription handled entirely by Apple's StoreKit. Payment, receipts, renewals, and refunds are managed by Apple — we do not see your payment method or Apple ID. The only subscription-related data our server handles is the anonymous transaction signature you present alongside an AI request, which we verify then discard.</p>
@@ -62,8 +94,14 @@
   <h3>Tracking & analytics</h3>
   <p>None. No third-party analytics, no advertising SDKs, no tracking pixels.</p>
 
-  <h3>Data deletion</h3>
-  <p>Deleting Calrdit from your device removes all local data. There is no cloud backup outside your own iCloud, and no account to delete.</p>
+  <h3>Account deletion</h3>
+  <p>Calrdit offers Sign in with Apple as a cosmetic identifier (we have no server-side accounts). To delete your "account":</p>
+  <ol>
+    <li><strong>In the app:</strong> Settings → Account → <strong>Delete account</strong>. This signs you out of Apple, clears every meal log, profile field, goal, reminder, AI-consent flag, and free-quota counter on this device.</li>
+    <li><strong>To fully revoke Apple's sign-in token:</strong> open iOS Settings → your Apple ID → Sign in with Apple → Calrdit → <strong>Stop Using</strong>. (Apple does not let third-party apps revoke this on your behalf.)</li>
+    <li><strong>Server-side data:</strong> none exists, so there is nothing further to delete.</li>
+  </ol>
+  <p>Deleting the app from your device also removes everything stored locally. There is no cloud backup outside your own private iCloud container.</p>
 
   <h3>Children</h3>
   <p>Calrdit is not directed at children under 13.</p>
