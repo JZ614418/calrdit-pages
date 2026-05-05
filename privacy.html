@@ -89,7 +89,11 @@
     <li><strong>Photo Library</strong> — only when you pick an existing photo. Same handling as camera.</li>
     <li><strong>Face ID</strong> — local biometric check to confirm the "payment." The result (yes / no) never leaves your device.</li>
     <li><strong>Notifications</strong> — optional meal-time nudges; scheduled locally via <code>UNUserNotificationCenter</code>.</li>
+    <li><strong>Apple Health (read-only)</strong> — if you grant access, Calrdit reads only <code>HKWorkout</code> samples (workout type, duration, calories burned, UUID) to deposit them as exercise transactions. We never write to Apple Health, never upload health data to our servers, and never link it to an account. You can revoke this anytime in iOS Settings → Privacy & Security → Health → Calrdit.</li>
   </ul>
+
+  <h3>Weight tracking (1.1)</h3>
+  <p>Each weight entry you log lives only on your device via SwiftData, optionally syncing through your private iCloud container (invisible to us). Weight is used to compute BMR (Mifflin-St Jeor) and to scale exercise calorie estimates (MET formula). We never transmit weight to any server. Settings → Account → Delete account erases the full history.</p>
 
   <h3>Tracking & analytics</h3>
   <p>None. No third-party analytics, no advertising SDKs, no tracking pixels.</p>
